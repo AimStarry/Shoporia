@@ -25,7 +25,7 @@
           <div class="bg-white border border-gray-100 p-8 shadow-sm">
             <h3 class="text-[11px] uppercase tracking-widest font-black border-b border-black pb-2 mb-6">Acquired Items</h3>
             <div class="space-y-6">
-              <div v-for="item in order.items" :key="item._id" class="flex items-center gap-6 pb-6 border-b border-gray-50 last:border-0">
+              <div v-v-for="item in order.items" :key="item._id" class="flex items-center gap-6 pb-6 border-b border-gray-50 last:border-0">
                 <div class="w-20 h-20 bg-gray-50 flex-shrink-0 border border-stone-100">
                   <img :src="getImageUrl(item.image)" class="w-full h-full object-cover">
                 </div>
@@ -105,11 +105,13 @@ const order = ref(null);
 const loading = ref(true);
 const updating = ref(false);
 
-const BACKEND_URL = 'http://localhost:5000';
+const BACKEND_URL = 'https://shoporia-18pc.onrender.com';
 
 const getImageUrl = (path) => {
   if (!path) return '/placeholder.jpg';
-  return path.startsWith('http') ? path : `${BACKEND_URL}${path}`;
+  if (path.startsWith('http')) return path;
+  const combined = `${BACKEND_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+  return combined.replace(/([^:]\/)\/+/g, "$1");
 };
 
 const fetchOrder = async () => {

@@ -70,15 +70,8 @@
             <tbody class="divide-y divide-stone-50">
               <tr v-for="order in orders" :key="order._id" class="group hover:bg-stone-50/50 transition-colors">
                 <td class="py-5 font-mono text-[9px] text-stone-400">#{{ order._id.slice(-8).toUpperCase() }}</td>
-                
-                <td class="font-bold text-stone-900">
-                  {{ order.shippingAddress?.fullName || 'Anonymous Client' }}
-                </td>
-
-                <td class="text-stone-500">
-                  {{ order.shippingAddress?.city }}, {{ order.shippingAddress?.province }}
-                </td>
-
+                <td class="font-bold text-stone-900">{{ order.shippingAddress?.fullName || 'Anonymous Client' }}</td>
+                <td class="text-stone-500">{{ order.shippingAddress?.city }}, {{ order.shippingAddress?.province }}</td>
                 <td class="font-serif text-sm">₱{{ order.total?.toLocaleString() }}</td>
                 <td>
                   <span :class="{
@@ -191,7 +184,7 @@ const users = ref([]);
 const orders = ref([]);
 const messages = ref([]);
 
-const BACKEND_URL = 'http://localhost:5000';
+const BACKEND_URL = 'https://shoporia-18pc.onrender.com';
 
 const totalInventoryValue = computed(() => products.value.reduce((acc, curr) => acc + (curr.price * (curr.countInStock || 1)), 0));
 const totalRevenue = computed(() => orders.value.reduce((acc, curr) => acc + (curr.total || 0), 0));
@@ -199,7 +192,9 @@ const pendingOrdersCount = computed(() => orders.value.filter(o => o.status === 
 
 const getImageUrl = (path) => {
   if (!path) return '/placeholder.jpg';
-  return path.startsWith('http') ? path : `${BACKEND_URL}${path}`;
+  if (path.startsWith('http')) return path;
+  const combined = `${BACKEND_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+  return combined.replace(/([^:]\/)\/+/g, "$1");
 };
 
 const fetchData = async () => {

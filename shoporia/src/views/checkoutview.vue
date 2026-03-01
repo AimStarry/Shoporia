@@ -123,7 +123,7 @@ const getFullImageUrl = (imagePath) => {
   if (!imagePath) return 'https://via.placeholder.com/400x500';
   if (imagePath.startsWith('http')) return imagePath;
   const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
-  return `${baseUrl}/${imagePath}`;
+  return `${baseUrl}${imagePath}`;
 };
 
 onMounted(() => {

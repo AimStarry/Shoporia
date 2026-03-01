@@ -29,7 +29,7 @@
           <div class="bg-white p-2 shadow-2xl border border-stone-100 group relative">
             <div class="aspect-[3/4] overflow-hidden bg-stone-50 relative">
               <img 
-                :src="imagePreview || `http://localhost:5000${form.image}`" 
+                :src="imagePreview || getImageUrl(form.image)" 
                 class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
               />
               <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
@@ -134,6 +134,8 @@ const fetching = ref(true);
 const imagePreview = ref(null);
 const selectedFile = ref(null);
 
+const BACKEND_URL = 'https://shoporia-18pc.onrender.com';
+
 const form = reactive({
   name: '',
   price: 0,
@@ -144,6 +146,13 @@ const form = reactive({
   color: '',
   size: ''
 });
+
+const getImageUrl = (path) => {
+  if (!path) return '/placeholder.jpg';
+  if (path.startsWith('http')) return path;
+  const combined = `${BACKEND_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+  return combined.replace(/([^:]\/)\/+/g, "$1");
+};
 
 const handleFileUpload = (e) => {
   const file = e.target.files[0];
