@@ -192,7 +192,6 @@ const submitProduct = async () => {
   to { opacity: 1; transform: scale(1); filter: blur(0); } 
 }
 
-/* Chrome/Safari hide arrows for number input */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;

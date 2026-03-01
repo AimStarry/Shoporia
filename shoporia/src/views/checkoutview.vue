@@ -69,11 +69,11 @@
             <div class="max-h-[300px] overflow-y-auto mb-8 pr-2 space-y-6 custom-scrollbar">
               <div v-for="item in cartItems" :key="item._id" class="flex gap-4">
                 <div class="w-20 h-24 bg-[#f9f9f9] rounded overflow-hidden flex-shrink-0">
-                  <img :src="getImageUrl(item.image)" class="w-full h-full object-cover">
+                  <img :src="getFullImageUrl(item.image)" class="w-full h-full object-cover">
                 </div>
                 <div class="flex-grow py-1">
                   <h4 class="text-sm font-bold uppercase tracking-tight leading-none mb-1">{{ item.name }}</h4>
-                  <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-2">{{ item.color }} / {{ item.size }} (x{{ item.quantity }})</p>
+                  <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-2">{{ item.color || 'Onyx' }} / {{ item.size || 'Standard' }} (x{{ item.quantity || item.qty }})</p>
                   <p class="font-bold text-sm">₱{{ item.price.toLocaleString() }}</p>
                 </div>
               </div>
@@ -86,7 +86,9 @@
               </div>
               <div class="flex justify-between text-xs uppercase tracking-widest text-gray-400">
                 <span>Shipping</span>
-                <span class="font-bold text-black">₱{{ shipping.toLocaleString() }}</span>
+                <span class="font-bold text-black" :class="{'text-emerald-600': subtotal >= 10000}">
+                  {{ subtotal >= 10000 ? 'Free' : '₱' + shipping.toLocaleString() }}
+                </span>
               </div>
               <div class="flex justify-between text-lg font-serif border-t border-gray-100 pt-4 mt-4">
                 <span class="italic">Total</span>
@@ -116,11 +118,12 @@ import api from '../api';
 const router = useRouter();
 const loading = ref(false);
 const cartItems = ref([]);
-const BACKEND_URL = 'http://localhost:5000';
 
-const getImageUrl = (path) => {
-  if (!path) return '/placeholder.jpg';
-  return path.startsWith('http') ? path : `${BACKEND_URL}${path}`;
+const getFullImageUrl = (imagePath) => {
+  if (!imagePath) return 'https://via.placeholder.com/400x500';
+  if (imagePath.startsWith('http')) return imagePath;
+  const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+  return `${baseUrl}/${imagePath}`;
 };
 
 onMounted(() => {
@@ -141,8 +144,14 @@ const form = reactive({
   zip: ''
 });
 
-const subtotal = computed(() => cartItems.value.reduce((acc, i) => acc + (i.price * i.quantity), 0));
-const shipping = ref(70);
+const subtotal = computed(() => {
+  return cartItems.value.reduce((acc, i) => acc + (i.price * (i.quantity || i.qty || 1)), 0);
+});
+
+const shipping = computed(() => {
+  return subtotal.value >= 10000 ? 0 : 250;
+});
+
 const total = computed(() => subtotal.value + shipping.value);
 
 const handlePayment = async () => {
@@ -154,19 +163,18 @@ const handlePayment = async () => {
   try {
     loading.value = true;
     
-    // UPDATED: Matched naming exactly to OrderSchema (items, subtotal, total, paymentMethod)
     const orderData = {
       items: cartItems.value.map(item => ({
-        productId: item._id, // Matched productId
+        productId: item._id,
         name: item.name,
         price: item.price,
-        quantity: item.quantity,
+        quantity: item.quantity || item.qty || 1,
         image: item.image,
         color: item.color || 'Standard',
         size: item.size || 'OS'
       })),
       shippingAddress: {
-        fullName: form.fullName, // Model requires fullName
+        fullName: form.fullName,
         address: form.address,
         city: form.city,
         province: form.province,
@@ -175,12 +183,13 @@ const handlePayment = async () => {
       subtotal: subtotal.value,
       shipping: shipping.value,
       total: total.value,
-      paymentMethod: 'COD' // Required field in your model
+      paymentMethod: 'COD'
     };
 
     await api.post('/orders', orderData);
     alert("Order successful! Thank you for choosing Shoporia.");
     localStorage.removeItem('cart');
+    window.dispatchEvent(new Event('storage'));
     router.push('/profile'); 
   } catch (error) {
     console.error("Order Failed:", error.response?.data || error);
@@ -190,3 +199,19 @@ const handlePayment = async () => {
   }
 };
 </script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+.font-serif { font-family: 'Playfair Display', serif; }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #000;
+  border-radius: 10px;
+}
+</style>

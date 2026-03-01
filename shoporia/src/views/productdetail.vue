@@ -10,7 +10,7 @@
         <div class="md:col-span-7 space-y-4">
           <div class="aspect-[4/5] bg-[#f7f7f7] overflow-hidden group">
             <img 
-              :src="getImageUrl(product.image)" 
+              :src="getFullImageUrl(product.image)" 
               :alt="product.name" 
               class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -122,19 +122,20 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router'; // Added useRouter
+import { useRoute, useRouter } from 'vue-router';
 import api from '../api';
 
 const route = useRoute();
-const router = useRouter(); // Initialize router
+const router = useRouter();
 const product = ref({});
 const qty = ref(1);
 const loading = ref(true);
-const BACKEND_URL = 'http://localhost:5000';
 
-const getImageUrl = (path) => {
-  if (!path) return '';
-  return path.startsWith('http') ? path : `${BACKEND_URL}${path}`;
+const getFullImageUrl = (imagePath) => {
+  if (!imagePath) return 'https://via.placeholder.com/400x500';
+  if (imagePath.startsWith('http')) return imagePath;
+  const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+  return `${baseUrl}/${imagePath}`;
 };
 
 const formatDate = (dateString) => {
@@ -169,17 +170,14 @@ const handleAddToCart = () => {
       alert(`Stock Limit: Only ${product.value.countInStock} available.`);
     }
   } else {
-    cart.push({ ...product.value, qty: qty.value });
+    cart.push({ ...product.value, qty: qty.value, quantity: qty.value });
     alert(`Added: ${product.value.name} to bag.`);
   }
   
   localStorage.setItem('cart', JSON.stringify(cart));
+  window.dispatchEvent(new Event('storage'));
 };
 
-/**
- * Buy Now Logic:
- * Adds item to cart and redirects immediately to checkout.
- */
 const handleBuyNow = () => {
   if (product.value.countInStock === 0) return;
 
@@ -187,16 +185,14 @@ const handleBuyNow = () => {
   const existItemIndex = cart.findIndex(x => x._id === product.value._id);
 
   if (existItemIndex !== -1) {
-    // If it exists, update it to the current selected quantity
     cart[existItemIndex].qty = qty.value;
+    cart[existItemIndex].quantity = qty.value;
   } else {
-    // Otherwise, add it
-    cart.push({ ...product.value, qty: qty.value });
+    cart.push({ ...product.value, qty: qty.value, quantity: qty.value });
   }
 
   localStorage.setItem('cart', JSON.stringify(cart));
-  
-  // Redirect to checkout
+  window.dispatchEvent(new Event('storage'));
   router.push('/checkout');
 };
 </script>

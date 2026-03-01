@@ -25,7 +25,7 @@
                  class="flex flex-col sm:flex-row items-start gap-8 pb-10 border-b border-stone-100 group">
               
               <div class="w-full sm:w-44 aspect-[3/4] bg-stone-100 overflow-hidden relative rounded-sm">
-                <img :src="getImageUrl(item.image)" :alt="item.name" 
+                <img :src="getFullImageUrl(item.image)" :alt="item.name" 
                      class="w-full h-full object-cover grayscale-[0.1] group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000">
               </div>
 
@@ -122,11 +122,12 @@ import { ref, computed, onMounted, watch } from 'vue';
 
 const cartItems = ref([]);
 const shipping = ref(250);
-const BACKEND_URL = 'http://localhost:5000';
 
-const getImageUrl = (path) => {
-  if (!path) return '/placeholder.jpg';
-  return path.startsWith('http') ? path : `${BACKEND_URL}${path}`;
+const getFullImageUrl = (imagePath) => {
+  if (!imagePath) return 'https://via.placeholder.com/400x500';
+  if (imagePath.startsWith('http')) return imagePath;
+  const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+  return `${baseUrl}/${imagePath}`;
 };
 
 onMounted(() => {
@@ -138,8 +139,7 @@ onMounted(() => {
 
 const subtotal = computed(() => {
   return cartItems.value.reduce((acc, item) => {
-    // Safety check: if quantity is missing, treat as 1
-    const qty = item.quantity || 1;
+    const qty = item.quantity || item.qty || 1;
     const price = item.price || 0;
     return acc + (price * qty);
   }, 0);
@@ -156,20 +156,16 @@ const updateStorage = () => {
 };
 
 const updateQty = (item, change) => {
-  // 1. Safety initialization: If qty is undefined/null, set to 1
   if (!item.quantity) {
-    item.quantity = 1;
+    item.quantity = item.qty || 1;
   }
-
-  console.log('Updating qty for:', item.name, 'Current:', item.quantity, 'Change:', change);
   
   const newQty = item.quantity + change;
   
   if (newQty >= 1) {
     item.quantity = newQty;
+    item.qty = newQty;
     updateStorage();
-  } else {
-    console.log('Minimum quantity reached.');
   }
 };
 

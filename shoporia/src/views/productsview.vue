@@ -99,7 +99,7 @@
                  class="group flex flex-col h-full bg-white relative">
               
               <router-link :to="`/product/${product._id}`" class="relative aspect-[4/5] overflow-hidden bg-stone-100 block">
-                <img :src="`http://localhost:5000${product.image}`" :alt="product.name" 
+                <img :src="getFullImageUrl(product.image)" :alt="product.name" 
                      class="w-full h-full object-cover transition-transform duration-[2.5s] ease-out group-hover:scale-110"
                      :class="product.countInStock === 0 ? 'grayscale brightness-75' : ''">
                 
@@ -181,6 +181,14 @@ const sortOptions = [
   { label: 'Value: High to Low', val: 'high' }
 ];
 
+// HELPER FUNCTION FOR RENDER IMAGES
+const getFullImageUrl = (imagePath) => {
+  if (!imagePath) return 'https://via.placeholder.com/400x500';
+  if (imagePath.startsWith('http')) return imagePath;
+  const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+  return `${baseUrl}/${imagePath}`;
+};
+
 const fetchProducts = async () => {
   try {
     loading.value = true;
@@ -252,7 +260,6 @@ const addToCart = (product) => {
   }
   
   localStorage.setItem('cart', JSON.stringify(cart));
-  // Optional: Trigger a custom event to update Navbar cart count immediately
   window.dispatchEvent(new Event('storage'));
 };
 

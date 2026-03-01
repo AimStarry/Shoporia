@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-[#fafafa] text-stone-900 font-sans pb-32 selection:bg-amber-100">
-    
     <nav class="py-8 px-6 md:px-12 bg-white border-b border-stone-100 sticky top-0 z-50">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-4 text-[9px] uppercase tracking-[0.4em] font-bold">
@@ -26,7 +25,6 @@
       </header>
 
       <div class="flex flex-col lg:flex-row gap-16 items-start">
-        
         <div class="w-full lg:w-4/12 lg:sticky lg:top-32 space-y-6">
           <div class="bg-white p-2 shadow-2xl border border-stone-100 group relative">
             <div class="aspect-[3/4] overflow-hidden bg-stone-50 relative">
@@ -58,7 +56,6 @@
         </div>
 
         <form @submit.prevent="updateProduct" class="w-full lg:w-8/12 space-y-10">
-          
           <section class="bg-white p-8 md:p-12 shadow-sm border border-stone-100 space-y-10">
             <h3 class="text-[10px] uppercase tracking-[0.5em] text-stone-900 font-black border-b border-stone-50 pb-4">01. Identity & Narrative</h3>
             <div class="space-y-8">
@@ -113,7 +110,7 @@
               Discard Changes
             </button>
             <button type="submit" :disabled="loading" 
-              class="flex-[2] bg-stone-900 text-white py-6 text-[10px] font-bold uppercase tracking-[0.6em] hover:bg-amber-900 transition-all shadow-xl disabled:opacity-50">
+              class="flex-[2] bg-stone-900 text-white py-6 text-[10px] font-bold uppercase tracking-widest hover:bg-amber-900 transition-all shadow-xl disabled:opacity-50">
               {{ loading ? 'Synchronizing...' : 'Update Archive' }}
             </button>
           </div>
@@ -165,7 +162,6 @@ const fetchProductDetails = async () => {
     alert("This item could not be retrieved from the archive.");
     router.push('/admin');
   } finally {
-    // Artificial delay for that "executive" smooth loading feel
     setTimeout(() => { fetching.value = false; }, 600);
   }
 };
@@ -214,7 +210,6 @@ onMounted(fetchProductDetails);
   to { opacity: 1; transform: translateY(0); } 
 }
 
-/* Hide spin arrows on number inputs for cleaner UI */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;

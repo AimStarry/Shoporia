@@ -117,7 +117,6 @@ const fetchOrder = async () => {
     loading.value = true;
     const orderId = route.params.id;
     
-    // Safety check for ID
     if (!orderId || orderId === 'undefined') {
        throw new Error("Invalid Order Reference");
     }
@@ -150,3 +149,8 @@ const handleUpdate = async () => {
 
 onMounted(fetchOrder);
 </script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+.font-serif { font-family: 'Playfair Display', serif; }
+</style>

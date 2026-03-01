@@ -49,10 +49,10 @@
                  class="flex flex-col lg:flex-row items-start lg:items-center gap-8 group">
               
               <div class="w-full lg:w-64 aspect-[4/5] bg-stone-100 overflow-hidden relative">
-                <img :src="getImageUrl(item.image)" :alt="item.name" 
+                <img :src="getFullImageUrl(item.image)" :alt="item.name" 
                      class="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700">
                 <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-[9px] font-bold tracking-widest uppercase">
-                  Qty: {{ item.quantity }}
+                  Qty: {{ item.quantity || item.qty }}
                 </div>
               </div>
 
@@ -74,24 +74,24 @@
                 
                 <div class="flex justify-between items-center pt-2">
                   <span class="text-[9px] uppercase tracking-widest text-stone-300">Shoporia Archives Manila</span>
-                  <p class="font-bold text-sm tracking-widest">SUBTOTAL: ₱{{ (item.price * item.quantity).toLocaleString() }}</p>
+                  <p class="font-bold text-sm tracking-widest">SUBTOTAL: ₱{{ (item.price * (item.quantity || item.qty)).toLocaleString() }}</p>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="mt-16 bg-stone-50 p-8 md:p-12 flex flex-col md:flex-row justify-between items-center gap-8 rounded-sm">
-             <div class="text-center md:text-left">
-               <p class="text-[10px] uppercase tracking-[0.5em] text-stone-400 mb-2">Total Collection Investment</p>
-               <h4 class="text-4xl font-serif">₱{{ order.total.toLocaleString() }}</h4>
-             </div>
+              <div class="text-center md:text-left">
+                <p class="text-[10px] uppercase tracking-[0.5em] text-stone-400 mb-2">Total Collection Investment</p>
+                <h4 class="text-4xl font-serif">₱{{ order.total.toLocaleString() }}</h4>
+              </div>
 
-             <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-               <router-link :to="`/rate/${order._id}`" 
-                  class="bg-stone-900 text-white px-12 py-5 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-stone-700 transition-all text-center">
-                  Review Pieces
-               </router-link>
-             </div>
+              <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                <router-link :to="`/rate/${order._id}`" 
+                   class="bg-stone-900 text-white px-12 py-5 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-stone-700 transition-all text-center">
+                   Review Pieces
+                </router-link>
+              </div>
           </div>
         </section>
       </div>
@@ -105,11 +105,12 @@ import api from '../api';
 
 const orders = ref([]);
 const loading = ref(true);
-const BACKEND_URL = 'http://localhost:5000';
 
-const getImageUrl = (path) => {
-  if (!path) return '/placeholder.jpg';
-  return path.startsWith('http') ? path : `${BACKEND_URL}${path}`;
+const getFullImageUrl = (imagePath) => {
+  if (!imagePath) return 'https://via.placeholder.com/400x500';
+  if (imagePath.startsWith('http')) return imagePath;
+  const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+  return `${baseUrl}/${imagePath}`;
 };
 
 const fetchOrders = async () => {

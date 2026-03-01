@@ -25,7 +25,7 @@
           
           <div class="flex gap-6 w-full md:w-1/3">
             <div class="w-32 h-32 bg-[#f7f7f7] overflow-hidden rounded-sm flex-shrink-0">
-              <img :src="getImageUrl(item.image)" :alt="item.name" class="w-full h-full object-cover">
+              <img :src="getFullImageUrl(item.image)" :alt="item.name" class="w-full h-full object-cover">
             </div>
             <div class="pt-2">
               <h3 class="text-2xl font-serif uppercase tracking-tight">{{ item.name }}</h3>
@@ -92,11 +92,12 @@ const route = useRoute();
 const ratingItems = ref([]);
 const loading = ref(true);
 const submitting = ref(false);
-const BACKEND_URL = 'http://localhost:5000';
 
-const getImageUrl = (path) => {
-  if (!path) return '/placeholder.jpg';
-  return path.startsWith('http') ? path : `${BACKEND_URL}${path}`;
+const getFullImageUrl = (imagePath) => {
+  if (!imagePath) return 'https://via.placeholder.com/400x400';
+  if (imagePath.startsWith('http')) return imagePath;
+  const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+  return `${baseUrl}/${imagePath}`;
 };
 
 onMounted(async () => {
@@ -105,24 +106,19 @@ onMounted(async () => {
     const { data } = await api.get('/orders/myorders');
     
     const productsToRate = [];
-    // Only process orders that match the ID if one is provided in URL
     const targetOrders = orderId ? data.filter(o => o._id === orderId) : data;
 
     targetOrders.forEach(order => {
       if (order.items && order.items.length > 0) {
         order.items.forEach(item => {
-          /** * UPDATED LOGIC:
-           * Based on your DB screenshot, the real product ID is stored in 'productId'.
-           * The item's '_id' is just a unique key for the order row.
-           */
-          const actualProductId = item.productId || item.product?._id || item.product;
+          const actualProductId = item.productId || (item.product && item.product._id) || item.product;
           
           if (actualProductId && !productsToRate.find(p => p.product === actualProductId)) {
             productsToRate.push({
               product: actualProductId, 
               name: item.name,
               image: item.image,
-              quantity: item.quantity, 
+              quantity: item.quantity || item.qty || 1, 
               rating: 5,
               comment: ""
             });
@@ -132,7 +128,6 @@ onMounted(async () => {
     });
     
     ratingItems.value = productsToRate;
-    console.log("Products ready for review (Verify IDs match your Product collection):", ratingItems.value);
   } catch (error) {
     console.error("Failed to load acquisitions:", error);
   } finally {
@@ -141,7 +136,6 @@ onMounted(async () => {
 });
 
 const submitRatings = async () => {
-  // Check for empty comments
   if (ratingItems.value.some(item => !item.comment.trim())) {
     alert("Please provide a brief comment for your acquisitions.");
     return;
@@ -150,9 +144,7 @@ const submitRatings = async () => {
   try {
     submitting.value = true;
     
-    // Map each item to an API promise
     const promises = ratingItems.value.map(item => {
-      console.log(`Submitting review for Product ID: ${item.product}`);
       return api.post(`/products/${item.product}/reviews`, {
         rating: item.rating,
         comment: item.comment
@@ -164,10 +156,8 @@ const submitRatings = async () => {
     router.push('/orders'); 
   } catch (error) {
     console.error("Feedback Submission Failed:", error);
-    
-    // Custom handling for the 404 Case (Common when DB IDs are mismatched)
     if (error.response?.status === 404) {
-      alert("Error: One or more products no longer exist in our database. Please check your order data.");
+      alert("Error: One or more products no longer exist in our database.");
     } else {
       alert(error.response?.data?.message || "Error saving feedback.");
     }
