@@ -27,7 +27,7 @@ Shoporia serves as a digital ledger and storefront for luxury goods. It allows u
 | **Backend** | Node.js, Express.js |
 | **Database** | MongoDB & Mongoose |
 | **File Handling** | Multer (Server-side storage) |
-| **Deployment** | Render (Web Service & Static Hosting) |
+| **Deployment** | Render (Web Service & Static Hosting) and Vercel (Frontend Deployment) |
 
 ## 📂 System Architecture
 
