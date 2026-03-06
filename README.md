@@ -46,7 +46,7 @@ The system follows a standard **Client-Server** architecture:
 
 ### **1. Clone the Repository**
 ```bash
-git clone [https://github.com/yourusername/shoporia.git](https://github.com/yourusername/shoporia.git)
+git clone https://github.com/AimStarry/Shoporia.git
 cd shoporia
 ```
 ### **2. Backend Setup**
@@ -63,7 +63,7 @@ npm start
 ### **3. Frontend Setup**
 ```bash
 # Navigate to frontend folder
-cd frontend
+cd shoporia
 npm install
 # Run the development server
 npm run dev
